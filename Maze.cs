@@ -54,31 +54,6 @@ namespace game
         }
         
         public void NextTurn () { }
-
-        // public void AddPlayer(Player player)
-        // {
-        //     players.Add(player);
-        // }
-        // public void RemovePlayer(Player player)
-        // {
-        //     players.Remove(player);
-        // }
-        // public void UpdatePlayerPosition(Player player, int newX, int newY)
-        // {
-        //     if (IsValidMove(player.XPosition, player.YPosition, newX, newY))
-        //     {
-        //         players[players.IndexOf(player)] = new Player(player.Name, newX, newY);
-        //     }
-        // }
-
-        // private bool IsValidMove(int startX, int startY, int endX, int endY)
-        // {
-        //     return IsInBounds(endX, endY) && !maze[endX, endY];
-        // }
-        // private bool IsInBounds(int x, int y)
-        // {
-        //     return x >= 0 && y >= 0 && x < width && y < height;
-        // }
     }
 }
 
