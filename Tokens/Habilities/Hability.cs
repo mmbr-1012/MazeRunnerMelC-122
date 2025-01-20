@@ -6,27 +6,23 @@ using System.Threading.Tasks;
 
 namespace game.Tokens.Habilities
 {
-    public abstract class Hability
+    public abstract class Hability(string name)
     {
-        readonly string name;
-
-        public Hability(string name)
-        {
-            this.name = name;
-        }
+        readonly string name = name;
 
         public string Name { get { return name; } }
 
         public abstract HabilityType Type { get; }
 
         public abstract void active();
-    }
-    public class ImmunityHability : Hability
-    {
-        public ImmunityHability(string name) : base(name)
-        {
-        }
 
+        public static implicit operator Hability(int v)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class ImmunityHability(string name) : Hability(name)
+    {
         public override HabilityType Type { get { return HabilityType.Immunity; } }
 
         public override void active()
@@ -34,12 +30,8 @@ namespace game.Tokens.Habilities
             throw new NotImplementedException();
         }
     }
-     internal class JumpObstacleHability : Hability
+     internal class JumpObstacleHability(string name) : Hability(name)
     {
-        public JumpObstacleHability(string name) : base(name)
-        {
-        }
-
         public override HabilityType Type { get { return HabilityType.JumpObstacle; } }
 
         public override void active()

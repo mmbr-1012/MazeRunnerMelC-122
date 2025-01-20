@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace game.Tramps
 {
-    public class BlockHabilityTramp : Tramp
+    public class BlockHabilityTramp(TrampType Type) : Tramp(TrampType.BlockHabilityTramp)
     {
-        public BlockHabilityTramp(TrampType type) : base(TrampType.BlockHabilityTramp)
-        {
-        }
-
         public override TrampType Type => TrampType.BlockHabilityTramp;
 
         public override void Active()

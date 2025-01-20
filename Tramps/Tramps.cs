@@ -2,14 +2,9 @@ using game.BoardGame;
 
 namespace game.Tramps   
 {
-    public abstract class Tramp : Square
+    public abstract class Tramp(TrampType type) : Square
     {
-        protected readonly TrampType type;
-
-        public Tramp(TrampType type)
-        {
-            this.type = type;
-        }
+        protected readonly TrampType type = type;
 
         public abstract TrampType Type { get; }
 
