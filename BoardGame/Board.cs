@@ -8,15 +8,17 @@ using game.Tramps;
 using game.RewardSquare;
 using System.Runtime.CompilerServices;
 using System.Data;
-using static game.MazeGame;
-using game.Program;
-using game.Tokens;
-using game.Gamers;
 
 namespace game.BoardGame
 {
     public class Board
     {
+        public static void Main()
+        {
+            int width = 100;
+            int height = 30;
+            Board board = new Board(width, height);
+        }
         private int[,] maze;
         private int width, height;
         private Random random = new Random();
@@ -24,12 +26,8 @@ namespace game.BoardGame
         private (int, int) end;
         private (int, int) subend;
         private int cantPathsFound = 4;
-
-        private List<(int dx, int dy)> directions = new List<(int, int)> { (1, 0), (-1, 0), (0, 1), (0, -1) };
+        private List<(int dx, int dy)>directions = new List<(int, int)> { (1, 0), (-1, 0), (0, 1), (0, -1) };
         private List<List<(int, int)>> paths = new List<List<(int, int)>>();
-        private int tokenIndex;
-
-        public int move { get; private set; }
 
         public Board(int width, int height)
         {
@@ -38,11 +36,7 @@ namespace game.BoardGame
             maze = new int[height, width];
             start = (1, 0);
             end = (28, width - 1);
-            subend = (28, 98);
-            List<Gamer> gamers = new List<Gamer>();
-            Gamer gamer = new Gamer(width, height);
-            Gamer.Start();
-            gamer.SelectToken(tokenIndex);
+            subend = (28,98);
             FindPath();
             GenerateMaze();
             PrintBoard();
@@ -53,14 +47,13 @@ namespace game.BoardGame
             {
                 for (int x = 0; x < width; x++)
                 {
-                    maze[y, x] = 1; // 1 representa una pared
+                    maze[y, x] = 1;
                 }
             }
-
             (int startX, int startY) = start;
             (int endX, int endY) = end;
             (int subendX, int subendY) = subend;
-            maze[startX, startY] = 0; // 0 representa un camino
+            maze[startX, startY] = 0; 
             maze[endX, endY] = 0;
             maze[subendX, subendY] = 0;
             CarveMaze(startX, startY);
@@ -73,8 +66,9 @@ namespace game.BoardGame
 
             foreach (var (dx, dy) in directions)
             {
-                int nx = x + dx * 2, ny = y + dy * 2;
-                if (IsInBounds(nx, ny) && maze[ny, nx] == 1 && nx != width - 1 && ny != height - 1)
+                int nx = x + dx*2 , ny = y + dy *2;
+                
+                if (IsInBounds(nx, ny) && maze[ny, nx] == 1 && nx != width -1 && ny != height - 1)
                 {
                     maze[ny - dy, nx - dx] = 0;
                     maze[ny, nx] = 0;
@@ -86,7 +80,7 @@ namespace game.BoardGame
         private void Shuffle(List<(int, int)> list)
         {
             for (int i = list.Count - 1; i > 0; i--)
-            {
+            {   
                 int j = random.Next(i + 1);
                 var temp = list[i];
                 list[i] = list[j];
@@ -115,32 +109,31 @@ namespace game.BoardGame
         {
             FindPaths(start, end, new List<(int, int)>(), 1);
         }
-
+        
         private void FindPaths((int, int) start, (int, int) end, List<(int, int)> savedPath, int maxCantPath)
         {
-            if (cantPathsFound >= maxCantPath)
+             if(cantPathsFound >= maxCantPath) 
             {
                 return;
             }
 
-            if (start == end)
+            if(start == end) 
             {
                 paths.Add(savedPath);
                 cantPathsFound += 1;
                 return;
             }
 
-            foreach (var (dx, dy) in directions)
+            foreach(var (dx, dy) in directions) 
             {
-                if (cantPathsFound == maxCantPath) break;
+                if(cantPathsFound == maxCantPath) break;
 
                 (int startX, int startY) = start;
                 (int endX, int endY) = end;
                 (int subendX, int subendY) = subend;
                 int x = dx + startX;
                 int y = dy + startY;
-
-                if (IsInBounds(x, y) && maze[x, y] == 0 && x != height - 1 && y != width - 1)
+                if(IsInBounds(x, y) && maze[x,y] == 0 && x != height - 1 && y != width - 1) 
                 {
                     maze[x, y] = 0;
                     savedPath.Add((x, y));
