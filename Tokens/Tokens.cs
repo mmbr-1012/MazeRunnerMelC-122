@@ -5,10 +5,6 @@ namespace game.Tokens
 {
     public class Token
     {
-        internal readonly int PositionX;
-        internal readonly int PositionY;
-        internal readonly int Symbol;
-
         public string Name { get; private set; }
         public string Hability { get; private set; }
 

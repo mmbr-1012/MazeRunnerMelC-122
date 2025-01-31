@@ -20,23 +20,8 @@ namespace game.Program
         {
             int width = 120;
             int height = 30;
-            string direction = null!;
-            string[] tokens = { "Heart", "Clover", "Star", "Diamond", "Moon", "Sun" };
-            string[] symbols = { "❤️", "☘️", "⭐", "💎", "🌙", "☀️" };
-
-            Console.WriteLine("Enter your name:");
-            string playerName = Console.ReadLine()!;
-
-            Console.WriteLine("Select a symbol for your character:");
-            for (int i = 0; i < tokens.Length; i++)
-            {
-                Console.WriteLine($"{tokens[i]} : {symbols[i]}");
-            }
-            string selectedSymbol = Console.ReadLine()!;
-
             Board board = new Board(width, height,0,0);
-            MazeGame.StartGame();
-            Player.MovePlayer(direction);
+            Player.PlayGame();
         }
     }
 }

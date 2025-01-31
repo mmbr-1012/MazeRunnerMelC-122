@@ -6,37 +6,37 @@ using System.Threading.Tasks;
 
 namespace game.Tokens.Habilities
 {
-    public abstract class Hability(string name)
+    public class Hability
     {
-        readonly string name = name;
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int Cooldown { get; set; }
+        public int CurrentCooldown { get; set; }
+        public int Cost { get; set; } // Costo en salud o recursos
 
-        public string Name { get { return name; } }
-
-        public abstract HabilityType Type { get; }
-
-        public abstract void active();
-
-        public static implicit operator Hability(int v)
+        public Hability(string name, string description, int cooldown, int cost)
         {
-            throw new NotImplementedException();
+            Name = name;
+            Description = description;
+            Cooldown = cooldown;
+            CurrentCooldown = 0;
+            Cost = cost;
         }
-    }
-    public class ImmunityHability(string name) : Hability(name)
-    {
-        public override HabilityType Type { get { return HabilityType.Immunity; } }
 
-        public override void active()
+        public bool CanUse()
         {
-            throw new NotImplementedException();
+            return CurrentCooldown <= 0;
         }
-    }
-     internal class JumpObstacleHability(string name) : Hability(name)
-    {
-        public override HabilityType Type { get { return HabilityType.JumpObstacle; } }
 
-        public override void active()
+        public void Use()
         {
-            throw new NotImplementedException();
+            CurrentCooldown = Cooldown;
+        }
+
+        public void Update()
+        {
+            if (CurrentCooldown > 0)
+                CurrentCooldown--;
         }
     }
 }

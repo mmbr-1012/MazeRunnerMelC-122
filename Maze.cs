@@ -18,61 +18,23 @@ namespace game
         private static List<Player> players = new List<Player>();
         private List<Token> tokens = new List<Token>();
         private static Random random = new Random();
-        static string name = null!; 
-        static string symbol = null!;
 
-        public MazeGame(int n, int countGamers, int countTokens, int width, int height, int totalSquares, int rewardSquaresCount, int emptySquares, (int, int) startPosition, int[,] Mazemaze)
+        public MazeGame(int n, int countGamers, int countTokens, int width, int height, int totalSquares, int rewardSquaresCount, int emptySquares, (int, int) startPosition, int[,] Mazemaze, int finishLine)
         {
             start = false;
             stop = false;
             currentTurn = 0;
-            board = new Board(0, 0, 0 ,0);
+            board = new Board(0, 0, 0, 0);
             board.GenerateMaze();
+            players = new List<Player>();
             this.countGamers = countGamers;
             this.countTokens = countTokens;
             maze = Mazemaze;
-            TokenManager.InitializeTokens();
         }
 
-        public static void AddPlayer(string playerName, string playerSymbol)
+        public void AddPlayer(Player player)
         {
-            if (players.Count < MaxPlayers)
-            {
-                players.Add(new Player(playerName, playerSymbol)); // Pass player name and symbol
-            }
-            else
-            {
-                Console.WriteLine("Maximum number of players reached.");
-            }
-        }
-
-        public static void PlayerTurn(Player player)
-        {
-            // Simulate player movement and trap/reward interaction
-            int outcome = random.Next(1, 11); // Random number between 1 and 10
-
-            if (outcome <= 3) // 30% chance of hitting a trap
-            {
-                player.Lives--;
-                Console.WriteLine($"{player.Name} hit a trap! Lives left: {player.Lives}");
-            }
-            else if (outcome <= 6) // 30% chance of hitting a reward
-            {
-                player.Lives++;
-                Console.WriteLine($"{player.Name} found a reward! Lives now: {player.Lives}");
-            }
-            else
-            {
-                Console.WriteLine($"{player.Name} moved safely.");
-            }
-        }
-
-        public static void StartGame()
-        {
-            foreach (var player in players)
-            {
-                PlayerTurn(player);
-            }
+            players.Add(player);
         }
 
         public bool Start { get { return start; } }

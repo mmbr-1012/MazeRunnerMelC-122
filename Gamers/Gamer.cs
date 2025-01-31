@@ -6,68 +6,85 @@ using System.Text;
 using System.Threading.Tasks;
 using game.Tramps;
 using game.RewardSquare;
+using game.BoardGame;
+using game.Tokens.Habilities;
 
 namespace game.Gamers
 {
-    public class Gamer
-    {
-        private static List<Player> players = new List<Player>();
-        private static int currentPlayerIndex;
-
-        public Gamer()
-        {
-            currentPlayerIndex = 0;
-        }
-
-    }
-
     public class Player
     {
-        private static int[,] maze = null!;
-        public string Name { get; private set; }
-        public string Symbol { get; private set; }
-        public int Lives { get; set; }
-        private static int playerX;
-        private static int playerY;
+        private static int HabilityIndex;
+        public string Name { get; set; }
+        public int Life { get; set; }
+        public int Position { get; set; }
+        public string Symbol { get; set; }
+        public int Health { get; set; }
+        public static Dictionary<string, Hability> Habilities { get; set; } = null!;
+        public int CurrentHealth { get; set; }
 
-        public Player(string name, string symbol)
+        public Player(string name, int life, string symbol)
         {
             Name = name;
+            Life = life;
             Symbol = symbol;
-            Lives = 3; // Initialize lives
-            playerX = 1; // Starting X position
-            playerY = 0; // Starting Y position
+            Position = 0;
+            Health = 100;
+            CurrentHealth = Health;
+            Habilities = new Dictionary<string, Hability>();
         }
-
-        public static void MovePlayer(string direction)
+        public static void PlayGame()
         {
-            switch (direction)
+            Board.PrintBoard();
+            // Board.UpdateHabilities();
+            Console.WriteLine("Usa las flechas para moverte. Presiona ESC para salir.");
+            while (true)
             {
-                case "w":
-                    if (IsValidMove(playerX - 1, playerY))
-                        playerX--;
-                    break;
-                case "s":
-                    if (IsValidMove(playerX + 1, playerY))
-                        playerX++;
-                    break;
-                case "a":
-                    if (IsValidMove(playerX, playerY - 1))
-                        playerY--;
-                    break;
-                case "d":
-                    if (IsValidMove(playerX, playerY + 1))
-                        playerY++;
-                    break;
-                default:
-                    Console.WriteLine("Invalid direction. Use 'W', 'S', 'A', or 'D'.");
-                    break;
+                if (Console.KeyAvailable)
+                {
+                    var keyInfo = Console.ReadKey(true);
+
+                    if (keyInfo.Key == ConsoleKey.Escape)
+                        break;
+
+                    if (keyInfo.Key == ConsoleKey.Spacebar)
+                    {
+                        // Mostrar menú de habilidades
+                        ShowHabilitiesMenu();
+                        continue;
+                    }
+
+                    Board.MovePlayer(keyInfo);
+                }
+
+                Thread.Sleep(100); // Pequeña pausa para controlar la velocidad de actualización
             }
-            ConsoleKeyInfo tecla = Console.ReadKey();
         }
-        private static bool IsValidMove(int x, int y)
+        private static void ShowHabilitiesMenu()
         {
-            return x >= 0 && x < maze.GetLength(0) && y >= 0 && y < maze.GetLength(1) && maze[x, y] != '#';
+            Console.Clear();
+            Console.WriteLine("Habilidades disponibles:");
+            int index = 1;
+            foreach (var hability in Habilities.Values)
+            {
+                Console.WriteLine($"{index}. {hability.Name} - {hability.Description}");
+                Console.WriteLine($"   Cooldown: {hability.CurrentCooldown}/{hability.Cooldown}");
+                Console.WriteLine($"   Costo: {hability.Cost} salud");
+                index++;
+            }
+
+            Console.WriteLine("\nPresiona el número de la habilidad o ESC para cancelar");
+            var key = Console.ReadKey(true);
+
+            if (key.Key != ConsoleKey.Escape)
+            {
+                int HabilityIndex;
+                if (int.TryParse(key.KeyChar.ToString(), out HabilityIndex) &&
+                    HabilityIndex > 0 && HabilityIndex <= Habilities.Count)
+                {
+                    var ability = Habilities.Values.ElementAt(HabilityIndex - 1);
+                    // Board.UseHability(hability.Name);
+                }
+            }
         }
     }
 }
