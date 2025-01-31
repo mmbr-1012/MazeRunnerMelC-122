@@ -1,28 +1,41 @@
-using game.BoardGame;
-using game.Tokens.Habilities;
-
+using System.Collections.Generic;
+using System.Text;
 
 namespace game.Tokens
 {
     public class Token
     {
-        public Token[] Tokens { get { return tokens; } }
-        private readonly Token[] gameTokens = null!;
-        private readonly Token[] tokens = null!;
-        public Token[] GameTokens { get { return gameTokens; } }
-        public string Name { get; set; }
-        public string Hability { get; set; }
-        public bool Selected { get; private set; }
-        public Token(string hability, string name, string gameToken, Token[] tokens)
+        internal readonly int PositionX;
+        internal readonly int PositionY;
+        internal readonly int Symbol;
+
+        public string Name { get; private set; }
+        public string Hability { get; private set; }
+
+        public Token(string name, string hability)
         {
-            Hability = hability;
             Name = name;
-            Selected = false;
+            Hability = hability;
+        }
+    }
+
+    public static class TokenManager
+    {
+        private static List<Token> tokens = new List<Token>();
+
+        public static void InitializeTokens()
+        {
+            tokens.Add(new Token("Warrior", "Strength"));
+            tokens.Add(new Token("Mage", "Magic"));
+            tokens.Add(new Token("Rogue", "Stealth"));
+            tokens.Add(new Token("Healer", "Healing"));
+            tokens.Add(new Token("Berserker", "Fury"));
+            tokens.Add(new Token("Guardian", "Defense"));
         }
 
-        public void Select()
+        public static List<Token> GetTokens()
         {
-            Selected = true;
+            return tokens;
         }
     }
 }

@@ -10,8 +10,7 @@ namespace game.Tramps
 
         public abstract void Active();
     }
-
-    public class Pitfall : Tramp
+     public class Pitfall : Tramp
     {
         public Pitfall() : base(TrampType.Pitfall) { }
 
@@ -20,6 +19,17 @@ namespace game.Tramps
         public override void Active()
         {
             Console.WriteLine("You fell into a pitfall!");
+        }
+    }
+    public class BlockHabilityTramp : Tramp
+    {
+        public BlockHabilityTramp() : base(TrampType.BlockHabilityTramp) { }
+
+        public override TrampType Type => TrampType.BlockHabilityTramp;
+
+        public override void Active()
+        {
+            Console.WriteLine("Hability Blocked!");
         }
     }
 
@@ -80,4 +90,3 @@ namespace game.Tramps
         }
     }
 }
-

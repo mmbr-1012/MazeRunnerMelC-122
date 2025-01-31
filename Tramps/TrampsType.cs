@@ -8,12 +8,12 @@ namespace game.Tramps
 {
     public enum TrampType
     {
-        BlockHabilityTramp = 2,
-        Fire = 3,
-        Thorns = 4,
-        Poison = 1,
-        Hole = 5,
-        Spike = 6,
-        Pitfall = 7
+        BlockHabilityTramp = 4,
+        Fire = 5,
+        Thorns = 6,
+        Poison = 7,
+        Hole = 8,
+        Spike = 9,
+        Pitfall = 10
     }
 }

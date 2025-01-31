@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿﻿using System.Threading.Tasks;
 using game.BoardGame;
 using game.Gamers;
 using game.Tokens;
@@ -9,53 +9,77 @@ namespace game
     {
         bool start;
         bool stop;
-        private int[,] maze;
+        private static int[,] maze = null!;
         readonly int currentTurn;
         readonly int countGamers;
         readonly int countTokens;
         readonly Board board;
-        private readonly Token[] gameTokens;
-        private List<Player> players;
-        private (int, int) playerPosition;
-        int steps;
-        private int player;
-        public MazeGame(int n, int countGamers, int countTokens, int width, int height, int totalSquares, int rewardSquaresCount, int emptySquares, (int, int) startPosition, int[,] maze)
+        private const int MaxPlayers = 6;
+        private static List<Player> players = new List<Player>();
+        private List<Token> tokens = new List<Token>();
+        private static Random random = new Random();
+        static string name = null!; 
+        static string symbol = null!;
+
+        public MazeGame(int n, int countGamers, int countTokens, int width, int height, int totalSquares, int rewardSquaresCount, int emptySquares, (int, int) startPosition, int[,] Mazemaze)
         {
             start = false;
             stop = false;
             currentTurn = 0;
-            board = new Board(0, 0);
+            board = new Board(0, 0, 0 ,0);
             board.GenerateMaze();
-            var mover = new Gamer;
-            mover.MovePlayers(move, steps, player);
             this.countGamers = countGamers;
             this.countTokens = countTokens;
-            this.players = new List<Player>();
-            this.playerPosition = startPosition;
-            this.maze = maze;
+            maze = Mazemaze;
+            TokenManager.InitializeTokens();
         }
 
-        public class Player(int name, int newX, int newY)
+        public static void AddPlayer(string playerName, string playerSymbol)
         {
-            int name = name;
-            private int newX = newX;
-            private int newY = newY;
-
-            public int Name { get { return name; } }
-            public int XPosition { get { return XPosition; } }
-            public int YPosition { get { return YPosition; } }
+            if (players.Count < MaxPlayers)
+            {
+                players.Add(new Player(playerName, playerSymbol)); // Pass player name and symbol
+            }
+            else
+            {
+                Console.WriteLine("Maximum number of players reached.");
+            }
         }
+
+        public static void PlayerTurn(Player player)
+        {
+            // Simulate player movement and trap/reward interaction
+            int outcome = random.Next(1, 11); // Random number between 1 and 10
+
+            if (outcome <= 3) // 30% chance of hitting a trap
+            {
+                player.Lives--;
+                Console.WriteLine($"{player.Name} hit a trap! Lives left: {player.Lives}");
+            }
+            else if (outcome <= 6) // 30% chance of hitting a reward
+            {
+                player.Lives++;
+                Console.WriteLine($"{player.Name} found a reward! Lives now: {player.Lives}");
+            }
+            else
+            {
+                Console.WriteLine($"{player.Name} moved safely.");
+            }
+        }
+
+        public static void StartGame()
+        {
+            foreach (var player in players)
+            {
+                PlayerTurn(player);
+            }
+        }
+
         public bool Start { get { return start; } }
-
         public bool Stop { get { return stop; } }
-
         public int CurrentTurn { get { return currentTurn; } }
-
         public int CountGamers { get { return countGamers; } }
-
         public int CountTokens { get { return countTokens; } }
-
-        public int move { get { return move; } }
 
         public void run()
         {
@@ -68,14 +92,5 @@ namespace game
         }
 
         public void NextTurn() { }
-
-
     }
 }
-
-
-
-/* MazeGame:
- * -start: se pone en true al comenzar el juego. Solo vuelve a estar en false cuando se crea un juego nuevo
- * -stop: se pone en true cuando se para el juego. Se vuelve a poner en false cuando el usuario quita la pausa del juego
- */
