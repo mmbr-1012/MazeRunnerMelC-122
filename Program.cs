@@ -5,7 +5,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using game.Tramps;
-using game.RewardSquare;
 using game.Gamers;
 using static game.MazeGame;
 using game.BoardGame;

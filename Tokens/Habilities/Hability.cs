@@ -12,7 +12,7 @@ namespace game.Tokens.Habilities
         public string Description { get; set; }
         public int Cooldown { get; set; }
         public int CurrentCooldown { get; set; }
-        public int Cost { get; set; } // Costo en salud o recursos
+        public int Cost { get; set; } 
 
         public Hability(string name, string description, int cooldown, int cost)
         {
@@ -39,6 +39,7 @@ namespace game.Tokens.Habilities
                 CurrentCooldown--;
         }
     }
+
 }
 
 /* Hability:

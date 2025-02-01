@@ -5,7 +5,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using game.Tramps;
-using game.RewardSquare;
 using System.Runtime.CompilerServices;
 using System.Data;
 using static game.MazeGame;
@@ -25,7 +24,6 @@ namespace game.BoardGame
         private (int, int) end;
         private (int, int) subend;
         private static (int, int) playerPosition;
-        private int maxCantPath = 4;
         private List<(int dx, int dy)> directions = new List<(int, int)> { (1, 0), (-1, 0), (0, 1), (0, -1) };
         private List<List<(int, int)>> paths = new List<List<(int, int)>>();
         static Player player = null!;
@@ -38,21 +36,19 @@ namespace game.BoardGame
         private readonly bool nearEnd;
         private readonly bool nearStart;
         private readonly bool blocksPath;
-        private readonly List<Hability> heartHabilities;
-        private readonly List<Hability> cloverHabilities;
-        private readonly List<Hability> starHabilities;
-        private readonly List<Hability> diamondHabilities;
-        private readonly List<Hability> moonHabilities;
-        private readonly List<Hability> sunHabilities;
-
+        private readonly List<Hability> heartHabilities = null!;
+        private readonly List<Hability> cloverHabilities = null!;
+        private readonly List<Hability> starHabilities = null!;
+        private readonly List<Hability> diamondHabilities = null!;
+        private readonly List<Hability> moonHabilities = null!;
+        private readonly List<Hability> sunHabilities = null!;
         public static Dictionary<string, Hability> Habilities { get; set; } = null!;
-        public Dictionary<string, List<Hability>> habilitiesBySymbol { get; private set; }
+        public Dictionary<string, List<Hability>> habilitiesBySymbol { get; private set; } = null!;
         public bool hasShield { get; private set; }
         public bool speedBoost { get; private set; }
 
         public Board(int boardWidth, int boardHeight, int x, int y)
         {
-
             width = boardWidth;
             height = boardHeight;
             maze = new int[height, width];
@@ -60,8 +56,8 @@ namespace game.BoardGame
             end = (28, width - 1);
             subend = (28, 118);
             playerPosition = (1, 0);
-            FindPath();
             GenerateMaze();
+            GeneratePath();
             CreateObstacles();
             CreateTramps();
             ActiveTramp(x, y, player);
@@ -153,7 +149,7 @@ namespace game.BoardGame
         }
         public static void PrintBoard()
         {
-            Console.SetCursorPosition(0, 0); // Evita Clear, solo sobrescribe
+            Console.SetCursorPosition(0, 0);
             Console.WriteLine("Posición actual: X=" + playerPosition.Item1 + ", Y=" + playerPosition.Item2);
 
             for (int y = 0; y < height; y++)
@@ -161,59 +157,67 @@ namespace game.BoardGame
                 for (int x = 0; x < width; x++)
                 {
                     Console.Write(maze[y, x] == 1 ? "█" :
-                                 maze[y, x] == 2 ? "X" :
+                                 maze[y, x] == 2 ? " " :
                                  maze[y, x] == 3 ? "🌳" :
                                  maze[y, x] == 0 ? " " :
                                  maze[y, x] == 11 ? playerSymbol :
-                                 maze[y,x] == 4? "🕳 " :
-                                 maze[y,x] == 5? "🔺 " :
-                                 maze[y,x] == 6? "🔥" :
-                                 maze[y,x] == 7? "☠ " :
-                                 maze[y,x] == 8? "🌀" :
-                                 maze[y,x] == 9? "💀 " :
-                                 maze[y,x] == 10? "⛔" : " ");
+                                 maze[y, x] == 4 ? "🕳 " :
+                                 maze[y, x] == 5 ? "🔺 " :
+                                 maze[y, x] == 6 ? "🔥" :
+                                 maze[y, x] == 7 ? "☠ " :
+                                 maze[y, x] == 8 ? "🌀" :
+                                 maze[y, x] == 9 ? "💀 " :
+                                 maze[y, x] == 10 ? "⛔" : " ");
                 }
                 Console.WriteLine();
             }
             Console.WriteLine("\nUsa las flechas para moverte (↑↓←→)");
         }
 
-        public void FindPath()
+        public void GeneratePath()
         {
-            FindPaths(start, end, new List<(int, int)>(), 1);
-        }
+            maze[28, width - 1] = 2;
+            maze[28, 117] = 2;
+            for (int i = 1; i <= 4; i++) maze[i, 1] = 2;
+            for (int i = 1; i <= 6; i++) maze[4, i] = 2;
+            for (int i = 4; i <= 7; i++) maze[i, 6] = 2;
+            for (int i = 7; i <= 12; i++) maze[7, i] = 2;
+            for (int i = 7; i >= 1; i--) maze[i, 12] = 2;
+            for (int i = 12; i <= 20; i++) maze[1, i] = 2;
+            for (int i = 1; i <= 13; i++) maze[i, 20] = 2;
+            for (int i = 20; i >= 4; i--) maze[13, i] = 2;
+            for (int i = 13; i <= 18; i++) maze[i, 4] = 2;
+            for (int i = 4; i <= 28; i++) maze[18, i] = 2;
+            for (int i = 18; i >= 14; i--) maze[i, 28] = 2;
+            for (int i = 28; i <= 33; i++) maze[14, i] = 2;
+            for (int i = 14; i <= height - 3; i++) maze[i, 33] = 2;
+            for (int i = 33; i <= 36; i++) maze[height - 3, i] = 2;
+            for (int i = height - 3; i >= height - 6; i--) maze[i, 36] = 2;
+            for (int i = 36; i <= 42; i++) maze[height - 6, i] = 2;
+            for (int i = height - 6; i <= height - 3; i++) maze[i, 42] = 2;
+            for (int i = 42; i <= 46; i++) maze[height - 3, i] = 2;
+            for (int i = height - 3; i >= 15; i--) maze[i, 46] = 2;
+            for (int i = 46; i <= 50; i++) maze[15, i] = 2;
+            for (int i = 15; i <= 20; i++) maze[i, 50] = 2;
+            for (int i = 50; i <= 65; i++) maze[20, i] = 2;
+            for (int i = 20; i >= 11; i--) maze[i, 65] = 2;
+            for (int i = 65; i <= 75; i++) maze[11, i] = 2;
+            for (int i = 11; i <= 16; i++) maze[i, 75] = 2;
+            for (int i = 75; i <= 90; i++) maze[16, i] = 2;
+            for (int i = 16; i <= 25; i++) maze[i, 90] = 2;
+            for (int i = 90; i <= 97; i++) maze[25, i] = 2;
+            for (int i = 25; i >= 20; i--) maze[i, 97] = 2;
+            for (int i = 97; i <= 110; i++) maze[20, i] = 2;
+            for (int i = 20; i <= height - 8; i++) maze[i, 110] = 2;
+            for (int i = 110; i <= 113; i++) maze[height - 8, i] = 2;
+            for (int i = height - 8; i <= height - 3; i++) maze[i, 113] = 2;
+            for (int i = 113; i <= 117; i++) maze[height - 3, i] = 2;
 
-        private void FindPaths((int, int) start, (int, int) end, List<(int, int)> savedPath, int cantPathsFound)
-        {
-            if (cantPathsFound >= maxCantPath)
+            for (int i = 0; i <= width - 1; i++)
             {
-                return;
+                if (maze[0, i] != 1) maze[0, i] = 1;
             }
 
-            if (start == end)
-            {
-                paths.Add(savedPath);
-                cantPathsFound += 1;
-                return;
-            }
-
-            foreach (var (dx, dy) in directions)
-            {
-                if (cantPathsFound == maxCantPath) break;
-
-                (int startX, int startY) = start;
-                (int endX, int endY) = end;
-                (int subendX, int subendY) = subend;
-                int x = dx + startX;
-                int y = dy + startY;
-
-                if (IsInBounds(x, y) && maze[x, y] == 0 && x != height - 1 && y != width - 1)
-                {
-                    maze[x, y] = 2;
-                    savedPath.Add((x, y));
-                    FindPaths((x, y), end, savedPath, maxCantPath);
-                }
-            }
         }
         public static void MovePlayer(ConsoleKeyInfo key)
         {
@@ -358,7 +362,6 @@ namespace game.BoardGame
                     break;
                 case 6:
                     Console.WriteLine("You got burned by fire!");
-                    //Ejemplo de ejecucion con el player: player.Points -= 10 (decrementar sus puntos en 10, por caer en este tipo de trampa)
                     break;
                 case 7:
                     Console.WriteLine("You drink Poison!");
@@ -374,9 +377,24 @@ namespace game.BoardGame
                     break;
             }
         }
+        private bool IsValidPosition(int x, int y)
+        {
+            // Posiciones prohibidas: inicio, final, subfinal y jugador
+            (int startX, int startY) = start;
+            (int endX, int endY) = end;
+            (int subendX, int subendY) = subend;
+            (int playerX, int playerY) = playerPosition;
+
+            bool isRestricted = (x == startX && y == startY) ||
+                                (x == endX && y == endY) ||
+                                (x == subendX && y == subendY) ||
+                                (x == playerX && y == playerY);
+
+            // Verificar que sea un camino transitable y no esté ocupado
+            return maze[x, y] == 0 && !isRestricted && !occupiedPositions.Contains((x, y));
+        }
         private void InitializeHabilities()
         {
-            // Inicializar todas las listas de habilidades
             var heartHabilities = new List<Hability>
             {
                 new Hability("Curación", "Restaura 20 puntos de salud", 3, 10),
@@ -413,7 +431,6 @@ namespace game.BoardGame
                 new Hability("Curación Solar", "Restaura salud a todos los jugadores", 8, 30)
             };
 
-            // Construir el diccionario
             habilitiesBySymbol = new Dictionary<string, List<Hability>>
             {
             { "❤️", heartHabilities },
@@ -424,7 +441,6 @@ namespace game.BoardGame
             { "☀️", sunHabilities }
         };
 
-            // Validar que playerSymbol existe en el diccionario
             if (habilitiesBySymbol.ContainsKey(playerSymbol))
             {
                 Habilities = new Dictionary<string, Hability>();
@@ -498,7 +514,6 @@ namespace game.BoardGame
                 }
             }
 
-            // Volver a ocultar después de un tiempo
             Task.Delay(5000).ContinueWith(t =>
             {
                 for (int y = 0; y < height; y++)
@@ -524,10 +539,9 @@ namespace game.BoardGame
             int newX = playerPosition.Item1;
             int newY = playerPosition.Item2;
 
-            // Intentar teletransportar la distancia máxima posible
             for (int distance = maxDistance; distance > 0; distance--)
             {
-                // Probar en todas las direcciones
+
                 foreach (var (dx, dy) in directions)
                 {
                     newX = playerPosition.Item1 + dx * distance;
