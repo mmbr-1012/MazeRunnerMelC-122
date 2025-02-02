@@ -6,6 +6,7 @@ namespace game.Tokens
     public class Token
     {
         public string Name { get; private set; }
+        public string Symbol { get; } = null!;
         public string Hability { get; private set; }
 
         public Token(string name, string hability)

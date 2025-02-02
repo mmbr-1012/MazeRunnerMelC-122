@@ -12,20 +12,23 @@ using game.Program;
 using game.Tokens;
 using game.Gamers;
 using game.Tokens.Habilities;
+using Spectre.Console;
 
 namespace game.BoardGame
 {
     public class Board
     {
         private static int[,] maze = null!;
-        private static int width, height; // Removed static modifier
-        private Random random = new Random();
-        private (int, int) start;
-        private (int, int) end;
-        private (int, int) subend;
-        private static (int, int) playerPosition;
-        private List<(int dx, int dy)> directions = new List<(int, int)> { (1, 0), (-1, 0), (0, 1), (0, -1) };
+        private static int width, height;
+        private static Random random = new Random();
+        private static (int, int) start;
+        private static (int, int) end;
+        private static (int, int) subend;
+        private static (int, int) playerPosition1;
+        private static (int, int) playerPosition2;
+        private static List<(int dx, int dy)> directions = new List<(int, int)> { (1, 0), (-1, 0), (0, 1), (0, -1) };
         private List<List<(int, int)>> paths = new List<List<(int, int)>>();
+        static Player[] players = new Player[2];
         static Player player = null!;
         private static string[] tokens = { "Heart", "Clover", "Star", "Diamond", "Moon", "Sun" };
         private static string[] symbols = { "❤️", "☘️", "⭐", "💎", "🌙", "☀️" };
@@ -33,38 +36,56 @@ namespace game.BoardGame
         private static int selectedTokenIndex = 0;
         private string[] obstacleSymbols = { "🌳", "🏔️", "🌲", "🏃", "🏃‍♂️" };
         private HashSet<(int, int)> occupiedPositions = new HashSet<(int, int)>();
-        private readonly bool nearEnd;
-        private readonly bool nearStart;
-        private readonly bool blocksPath;
-        private readonly List<Hability> heartHabilities = null!;
-        private readonly List<Hability> cloverHabilities = null!;
-        private readonly List<Hability> starHabilities = null!;
-        private readonly List<Hability> diamondHabilities = null!;
-        private readonly List<Hability> moonHabilities = null!;
-        private readonly List<Hability> sunHabilities = null!;
-        public static Dictionary<string, Hability> Habilities { get; set; } = null!;
+        string HabilityName = null!;
+        private static readonly bool nearEnd;
+        private static readonly bool nearStart;
+        private static readonly bool blocksPath;
+        private static readonly List<Hability> heartHabilities = null!;
+        private static readonly List<Hability> cloverHabilities = null!;
+        private static readonly List<Hability> starHabilities = null!;
+        private static readonly List<Hability> diamondHabilities = null!;
+        private static readonly List<Hability> moonHabilities = null!;
+        private static readonly List<Hability> sunHabilities = null!;
+        private static readonly Hability hability = null!;
+        private static Dictionary<string, Hability> Habilities = new Dictionary<string, Hability>();
         public Dictionary<string, List<Hability>> habilitiesBySymbol { get; private set; } = null!;
-        public bool hasShield { get; private set; }
-        public bool speedBoost { get; private set; }
+        public static bool hasShield { get; private set; }
+        public static int shieldStrength { get; private set; }
+        public static bool speedBoost { get; private set; }
+        private Player _currentPlayer1;
+        private Player _currentPlayer2;
+        private static Player _player1 = null!;
+        private static Player _player2 = null!;
+        Player player1 = null!;
+        Player player2 = null!;
 
-        public Board(int boardWidth, int boardHeight, int x, int y)
+        public Board(int boardWidth, int boardHeight, int x, int y, Player[] players)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.CursorVisible = false;
+            _player1 = players.Length > 0 ? players[0] : new Player("Jugador 1", "playerSymbol");
+            _player2 = players.Length > 1 ? players[1] : new Player("Jugador 2", "playerSymbol");
+            _currentPlayer1 = player1;
+            _currentPlayer2 = player2;
+            playerSymbol = _player1.Symbol;
+            playerSymbol = _player2.Symbol;
             width = boardWidth;
             height = boardHeight;
             maze = new int[height, width];
             start = (1, 0);
             end = (28, width - 1);
             subend = (28, 118);
-            playerPosition = (1, 0);
+            playerPosition1 = (1, 0);
+            playerPosition2 = (28, width - 1);
             GenerateMaze();
             GeneratePath();
             CreateObstacles();
             CreateTramps();
             ActiveTramp(x, y, player);
-            SelectPlayerSymbol();
             InitializeHabilities();
             Console.WriteLine("\nPulsa una tecla para comenzar...");
             Console.ReadKey();
+            Console.WriteLine("Vera este laberinto raro pero el problema es que esta embrujado a me dida que avance podra ver mejor los caminos");
             Player.PlayGame();
         }
 
@@ -74,18 +95,20 @@ namespace game.BoardGame
             {
                 for (int x = 0; x < width; x++)
                 {
-                    maze[y, x] = 1; // 1 represents a wall
+                    maze[y, x] = 1;
                 }
             }
 
             (int startX, int startY) = start;
             (int endX, int endY) = end;
             (int subendX, int subendY) = subend;
-            (int playerPositionx, int playerPositiony) = playerPosition;
-            maze[startX, startY] = 0; // 0 represents a path
+            (int playerPosition1x, int playerPosition1y) = playerPosition1;
+            (int playerPosition2x, int playerPosition2y) = playerPosition2;
+            maze[startX, startY] = 0;
             maze[endX, endY] = 0;
             maze[subendX, subendY] = 0;
-            maze[playerPositionx, playerPositiony] = 11;
+            maze[playerPosition1x, playerPosition1y] = 11;
+            maze[playerPosition2x, playerPosition2y] = 12;
             CarveMaze(startX, startY);
         }
 
@@ -97,7 +120,7 @@ namespace game.BoardGame
             foreach (var (dx, dy) in directions)
             {
                 int nx = x + dx * 2, ny = y + dy * 2;
-                // Asegurar que no se modifique el borde del laberinto
+
                 if (IsInBounds(nx, ny) && maze[ny, nx] == 1 && nx < width - 1 && ny < height - 1)
                 {
                     maze[ny - dy, nx - dx] = 0;
@@ -122,56 +145,37 @@ namespace game.BoardGame
         {
             return x >= 0 && x < width && y >= 0 && y < height;
         }
-
-        public static void SelectPlayerSymbol()
-        {
-            Console.Clear();
-            Console.WriteLine("Elige tu símbolo:");
-
-            // Mostrar todos los símbolos disponibles
-            for (int i = 0; i < tokens.Length; i++)
-            {
-                Console.WriteLine($"{i + 1}. {tokens[i]} {symbols[i]}");
-            }
-
-            // Obtener la selección del usuario
-            while (true)
-            {
-                if (int.TryParse(Console.ReadLine(), out int selection) &&
-                    selection > 0 && selection <= tokens.Length)
-                {
-                    selectedTokenIndex = selection - 1;
-                    playerSymbol = symbols[selectedTokenIndex];
-                    break;
-                }
-                Console.WriteLine("Selección inválida. Intenta de nuevo:");
-            }
-        }
         public static void PrintBoard()
         {
-            Console.SetCursorPosition(0, 0);
-            Console.WriteLine("Posición actual: X=" + playerPosition.Item1 + ", Y=" + playerPosition.Item2);
-
+            Console.Clear();
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
                     Console.Write(maze[y, x] == 1 ? "█" :
-                                 maze[y, x] == 2 ? " " :
-                                 maze[y, x] == 3 ? "🌳" :
-                                 maze[y, x] == 0 ? " " :
-                                 maze[y, x] == 11 ? playerSymbol :
-                                 maze[y, x] == 4 ? "🕳 " :
-                                 maze[y, x] == 5 ? "🔺 " :
-                                 maze[y, x] == 6 ? "🔥" :
-                                 maze[y, x] == 7 ? "☠ " :
-                                 maze[y, x] == 8 ? "🌀" :
-                                 maze[y, x] == 9 ? "💀 " :
-                                 maze[y, x] == 10 ? "⛔" : " ");
+                                maze[y, x] == 2 ? " " :
+                                maze[y, x] == 3 ? "🌳" :
+                                maze[y, x] == 0 ? " " :
+                                maze[y, x] == 11 ? playerSymbol :
+                                maze[y, x] == 12 ? playerSymbol :
+                                maze[y, x] == 4 ? "🕳 " :
+                                maze[y, x] == 5 ? "🔺 " :
+                                maze[y, x] == 6 ? "🔥" :
+                                maze[y, x] == 7 ? "☠ " :
+                                maze[y, x] == 8 ? "🌀" :
+                                maze[y, x] == 9 ? "💀 " :
+                                maze[y, x] == 10 ? "⛔" : " ");
                 }
                 Console.WriteLine();
             }
-            Console.WriteLine("\nUsa las flechas para moverte (↑↓←→)");
+            Console.SetCursorPosition(playerPosition1.Item2, playerPosition1.Item1);
+            Console.Write(_player1.Symbol);
+            Console.SetCursorPosition(playerPosition2.Item2, playerPosition2.Item1);
+            Console.Write(_player2.Symbol);
+
+            Console.SetCursorPosition(0, height + 1);
+            Console.WriteLine($"Vidas: {_player1.Name} ({_player1.Lives}) | {_player2.Name} ({_player2.Lives})");
+            Console.WriteLine("Usa las flechas (↑↓←→) o WASD para moverte");
         }
 
         public void GeneratePath()
@@ -219,47 +223,70 @@ namespace game.BoardGame
             }
 
         }
-        public static void MovePlayer(ConsoleKeyInfo key)
+        public static void MovePlayer(ConsoleKeyInfo key, Player player)
         {
-            int newX = playerPosition.Item1;
-            int newY = playerPosition.Item2;
-
-            switch (key.Key)
+            int deltaX = 0, deltaY = 0;
+            if (player == _player1 || player == _player2)
             {
-                case ConsoleKey.UpArrow:
-                    newX -= 1;
-                    break;
-                case ConsoleKey.DownArrow:
-                    newX += 1;
-                    break;
-                case ConsoleKey.LeftArrow:
-                    newY -= 1;
-                    break;
-                case ConsoleKey.RightArrow:
-                    newY += 1;
-                    break;
-                default:
-                    return; // Ignora otras teclas
+                switch (key.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                    case ConsoleKey.W: deltaX = -1; break;
+                    case ConsoleKey.DownArrow:
+                    case ConsoleKey.S: deltaX = 1; break;
+                    case ConsoleKey.LeftArrow:
+                    case ConsoleKey.A: deltaY = -1; break;
+                    case ConsoleKey.RightArrow:
+                    case ConsoleKey.D: deltaY = 1; break;
+                    default: return;
+                }
             }
 
-            // Validar si el movimiento es válido
-            if (!IsValidMove(newX, newY))
-                return;
+            int newX = (player == _player1) ? playerPosition1.Item1 + deltaX : playerPosition2.Item1 + deltaX;
+            int newY = (player == _player1) ? playerPosition1.Item2 + deltaY : playerPosition2.Item2 + deltaY;
 
-            // Actualizar la posición del jugador en el laberinto
-            maze[playerPosition.Item1, playerPosition.Item2] = 0; // Limpiar posición anterior
-            playerPosition = (newX, newY);
-            maze[playerPosition.Item1, playerPosition.Item2] = 11; // Marcar nueva posición
+            if (!IsValidMove(newX, newY)) return;
 
-            // Verificar si pisó una trampa
+            if (player == _player1)
+            {
+                maze[playerPosition1.Item1, playerPosition1.Item2] = 0;
+                playerPosition1 = (newX, newY);
+                maze[newX, newY] = 11;
+            }
+            else
+            {
+                maze[playerPosition2.Item1, playerPosition2.Item2] = 0;
+                playerPosition2 = (newX, newY);
+                maze[newX, newY] = 12;
+            }
+            // CheckTrap(player);
             ActiveTramp(newX, newY, player);
             PrintBoard();
         }
+        private static void CheckTrap(Player player)
+        {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player), "Player object cannot be null");
+            }
+            int cellValue = maze[player.Position.X, player.Position.Y];
+            if (cellValue >= 4 && cellValue <= 10)
+            {
+                int damage = hasShield ? 1 : 2;
 
+                player.LoseLife();
+                ActiveTramp(player.Position.X, player.Position.Y, player);
+
+                if (hasShield)
+                {
+                    hasShield = false;
+                    shieldStrength = 0;
+                }
+            }
+        }
         private static bool IsValidMove(int newX, int newY)
         {
-            // Corregir orden: x es fila, y es columna
-            if (!IsInBounds(newY, newX)) // newY = columna, newX = fila
+            if (!IsInBounds(newY, newX))
                 return false;
 
             if (maze[newX, newY] == 1 || maze[newX, newY] == 3)
@@ -267,7 +294,7 @@ namespace game.BoardGame
 
             return true;
         }
-        private void CreateTramps()
+        private static void CreateTramps()
         {
             (int startX, int startY) = start;
             (int endX, int endY) = end;
@@ -294,103 +321,74 @@ namespace game.BoardGame
                     x = random.Next(0, height);
                     y = random.Next(0, width);
                 }
-                while ((x, y) == playerPosition || maze[x, y] != 0); // Evitar posición del jugador
+                while ((x, y) == playerPosition1 || maze[x, y] != 0);
                 maze[x, y] = random.Next(4, 12);
             }
         }
 
         private void CreateObstacles()
         {
-            (int startX, int startY) = start;
-            (int endX, int endY) = end;
-
-            // Lista de símbolos bonitos para obstáculos
-            string[] obstacleSymbols = { "🌳" };
-
-            // Crear solo 5 obstáculos estratégicos
             int cantObstacles = 5;
             HashSet<(int, int)> occupiedPositions = new HashSet<(int, int)>();
 
             for (int i = 0; i < cantObstacles; i++)
             {
                 int x, y;
+                bool isValidPosition;
 
-                // Evitar la primera columna (entrada) y última columna (salida)
                 do
                 {
-                    x = random.Next(1, height - 1); // Evitar primera y última fila
-                    y = random.Next(1, width - 2);  // Evitar primera y última columna
+                    x = random.Next(1, height - 1);
+                    y = random.Next(1, width - 2);
 
-                    // Verificar que no esté cerca de la entrada ni la salida
-                    bool nearStart = Math.Abs(x - startX) < 3 && Math.Abs(y - startY) < 3;
-                    bool nearEnd = Math.Abs(x - endX) < 3 && Math.Abs(y - endY) < 3;
+                    // Verificar que no esté cerca de inicio o fin
+                    bool nearStart = Math.Abs(x - start.Item1) < 3 && Math.Abs(y - start.Item2) < 3;
+                    bool nearEnd = Math.Abs(x - end.Item1) < 3 && Math.Abs(y - end.Item2) < 3;
 
-                    // Verificar que no bloquee los caminos encontrados
-                    bool blocksPath = false;
-                    foreach (var path in paths)
-                    {
-                        if (path.Contains((x, y)))
-                            blocksPath = true;
-                    }
+                    isValidPosition = !nearStart && !nearEnd &&
+                                     maze[x, y] == 0 &&
+                                     !occupiedPositions.Contains((x, y));
+                } while (!isValidPosition);
 
-                    // Aceptar la posición solo si cumple todas las condiciones
-                }
-                while ((x == startX && y == startY) ||
-                         (x == endX && y == endY) ||
-                         maze[x, y] != 0 ||
-                         occupiedPositions.Contains((x, y)) ||
-                         nearStart ||
-                         nearEnd ||
-                         blocksPath);
-
-                // Asignar un símbolo aleatorio del array
-                maze[x, y] = 3;
+                maze[x, y] = 3;  // '@'
                 occupiedPositions.Add((x, y));
             }
         }
         private static void ActiveTramp(int x, int y, Player player)
         {
             int squareType = maze[x, y];
+            if (squareType is < 4 or > 10) return;
 
-            switch (squareType)
+            player.LoseLife();
+            Console.WriteLine($"¡{player.Name} activó una trampa!");
+
+            string[] trapMessages = new[]
             {
-                case 4:
-                    Console.WriteLine("You fell into a pitfall!");
-                    break;
-                case 5:
-                    Console.WriteLine("You stepped on a spike!");
-                    break;
-                case 6:
-                    Console.WriteLine("You got burned by fire!");
-                    break;
-                case 7:
-                    Console.WriteLine("You drink Poison!");
-                    break;
-                case 8:
-                    Console.WriteLine("You just fell into Thorns!");
-                    break;
-                case 9:
-                    Console.WriteLine("You just fell into a Hole!");
-                    break;
-                case 10:
-                    Console.WriteLine("HHability Blocked!");
-                    break;
+                "¡Has caído en un pozo!",
+                "¡Te has pinchado con una espina!",
+                "¡Has sido quemado por fuego!",
+                "¡Has bebido veneno!",
+                "¡Te has pinchado con espinos!",
+                "¡Has caído en un agujero!",
+                "¡Tu habilidad ha sido bloqueada!"
+            };
+            if (squareType - 4 < trapMessages.Length)
+            {
+                Console.WriteLine(trapMessages[squareType - 4]);
             }
         }
         private bool IsValidPosition(int x, int y)
         {
-            // Posiciones prohibidas: inicio, final, subfinal y jugador
             (int startX, int startY) = start;
             (int endX, int endY) = end;
             (int subendX, int subendY) = subend;
-            (int playerX, int playerY) = playerPosition;
+            (int playerX, int playerY) = playerPosition1;
 
             bool isRestricted = (x == startX && y == startY) ||
                                 (x == endX && y == endY) ||
                                 (x == subendX && y == subendY) ||
                                 (x == playerX && y == playerY);
 
-            // Verificar que sea un camino transitable y no esté ocupado
             return maze[x, y] == 0 && !isRestricted && !occupiedPositions.Contains((x, y));
         }
         private void InitializeHabilities()
@@ -440,11 +438,11 @@ namespace game.BoardGame
             { "🌙", moonHabilities },
             { "☀️", sunHabilities }
         };
-
+            string currentPlayerSymbol = _player1.Symbol;
             if (habilitiesBySymbol.ContainsKey(playerSymbol))
             {
                 Habilities = new Dictionary<string, Hability>();
-                foreach (var hability in habilitiesBySymbol[playerSymbol])
+                foreach (var hability in habilitiesBySymbol[currentPlayerSymbol])
                 {
                     Habilities.Add(hability.Name, hability);
                 }
@@ -454,7 +452,7 @@ namespace game.BoardGame
                 throw new KeyNotFoundException($"Símbolo del jugador '{playerSymbol}' no encontrado en habilitiesBySymbol.");
             }
         }
-        public void UseHability(string HabilityName)
+        public static void UseHability(string HabilityName)
         {
             if (Habilities.TryGetValue(HabilityName, out var Hability) && Hability.CanUse())
             {
@@ -475,41 +473,56 @@ namespace game.BoardGame
             }
         }
 
-        private void ActivateHability(Hability Hability)
+        private static void ActivateHability(Hability hability)
         {
-            switch (Hability.Name)
+            if (hability == null) return;
+
+            if (player.CurrentHealth >= hability.Cost)
             {
-                case "Curación":
-                    player.CurrentHealth = Math.Min(player.Health, player.CurrentHealth + 20);
-                    break;
-                case "Escudo":
-                    hasShield = true;
-                    break;
-                case "Estrella Brillante":
-                    RevealArea();
-                    break;
-                case "Teletransporte":
-                    Teleport();
-                    break;
-                case "Luna Llena":
-                    speedBoost = true;
-                    break;
-                case "Visión Nocturna":
-                    RevealTraps();
-                    break;
+                switch (hability.Name)
+                {
+                    case "Curación":
+                        player.CurrentHealth = Math.Min(player.Health, player.CurrentHealth + 20);
+                        break;
+                    case "Escudo":
+                        hasShield = true;
+                        shieldStrength = 10;
+                        break;
+                    case "Estrella Brillante":
+                        RevealArea();
+                        break;
+                    case "Teletransporte":
+                        Teleport();
+                        break;
+                    case "Luna Llena":
+                        speedBoost = true;
+                        Task.Delay(5000).ContinueWith(t =>
+                        {
+                            speedBoost = false;
+                        });
+                        break;
+                    case "Visión Nocturna":
+                        RevealTraps();
+                        break;
+                }
+
             }
+            else
+            {
+                Console.WriteLine("La habilidad no existe");
+            }
+
         }
 
-        private void RevealTraps()
+        private static void RevealTraps()
         {
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    // Revelar trampas pero mantener obstáculos normales
                     if (maze[y, x] >= 4 && maze[y, x] <= 10)
                     {
-                        maze[y, x] = 2; // Marcar como revelado
+                        maze[y, x] = 2;
                     }
                 }
             }
@@ -520,12 +533,12 @@ namespace game.BoardGame
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        if (maze[y, x] == 2 && (y, x) != playerPosition)
+                        if (maze[y, x] == 2 && (y, x) != playerPosition1)
                         {
                             if ((y, x) == start || (y, x) == end || (y, x) == subend)
                                 maze[y, x] = 0;
                             else if (maze[y, x] == 2)
-                                maze[y, x] = 3; // Volver a obstáculo
+                                maze[y, x] = 3;
                         }
                     }
                 }
@@ -533,30 +546,26 @@ namespace game.BoardGame
             });
         }
 
-        private void Teleport()
+        private static void Teleport()
         {
             int maxDistance = 3;
-            int newX = playerPosition.Item1;
-            int newY = playerPosition.Item2;
+            int newX = playerPosition1.Item1 + 3;
+            int newY = playerPosition1.Item2;
 
             for (int distance = maxDistance; distance > 0; distance--)
             {
 
                 foreach (var (dx, dy) in directions)
                 {
-                    newX = playerPosition.Item1 + dx * distance;
-                    newY = playerPosition.Item2 + dy * distance;
+                    newX = playerPosition1.Item1 + dx * distance;
+                    newY = playerPosition1.Item2 + dy * distance;
 
-                    // Verificar si la posición es válida
                     if (newX >= 0 && newX < height && newY >= 0 && newY < width &&
                         maze[newX, newY] == 0)
                     {
-                        // Actualizar posición
-                        maze[playerPosition.Item1, playerPosition.Item2] = 0;
-                        playerPosition = (newX, newY);
+                        maze[playerPosition1.Item1, playerPosition1.Item2] = 0;
+                        playerPosition1 = (newX, newY);
                         maze[newX, newY] = 11;
-
-                        // Verificar trampas en la nueva posición
                         ActiveTramp(newX, newY, player);
                         PrintBoard();
                         return;
@@ -565,13 +574,12 @@ namespace game.BoardGame
             }
         }
 
-        private void RevealArea()
+        private static void RevealArea()
         {
-            int centerX = playerPosition.Item1;
-            int centerY = playerPosition.Item2;
-            int radius = 2; // Radio de visión
+            int centerX = playerPosition1.Item1;
+            int centerY = playerPosition1.Item2;
+            int radius = 2;
 
-            // Crear un área circular alrededor del jugador
             for (int y = -radius; y <= radius; y++)
             {
                 for (int x = -radius; x <= radius; x++)
@@ -579,31 +587,28 @@ namespace game.BoardGame
                     int newX = centerX + x;
                     int newY = centerY + y;
 
-                    // Verificar que la posición esté dentro del laberinto
                     if (newX >= 0 && newX < height && newY >= 0 && newY < width)
                     {
-                        // Revelar trampas y obstáculos
                         if (maze[newX, newY] >= 4 && maze[newX, newY] <= 10)
                         {
-                            maze[newX, newY] = 2; // Marcar como revelado
+                            maze[newX, newY] = 2;
                         }
                     }
                 }
             }
 
-            // Volver a ocultar después de un tiempo
             Task.Delay(3000).ContinueWith(t =>
             {
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        if (maze[y, x] == 2 && (y, x) != playerPosition)
+                        if (maze[y, x] == 2 && (y, x) != playerPosition1)
                         {
                             if ((y, x) == start || (y, x) == end || (y, x) == subend)
                                 maze[y, x] = 0;
                             else if (maze[y, x] == 2)
-                                maze[y, x] = 3; // Volver a obstáculo
+                                maze[y, x] = 3;
                         }
                     }
                 }
@@ -611,12 +616,12 @@ namespace game.BoardGame
             });
         }
 
-        // public static void UpdateHabilities()
-        // {
-        //     foreach (var Hability in Habilities.Values)
-        //     {
-        //         Hability.Update();
-        //     }
-        // }
+        public static void UpdateHabilities()
+        {
+            foreach (var Hability in Habilities.Values)
+            {
+                Hability.Update();
+            }
+        }
     }
 }

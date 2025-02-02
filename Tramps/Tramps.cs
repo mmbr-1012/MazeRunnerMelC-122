@@ -1,8 +1,30 @@
 using game.BoardGame;
+using game.Gamers;
 
-namespace game.Tramps   
+namespace game.Tramps
 {
-    public abstract class Tramp(TrampType type) 
+    public class Trap
+    {
+        public int Type { get; }
+        public string Name { get; }
+        public int Damage { get; }
+        public string Message { get; }
+
+        public Trap(int type, string name, int damage, string message)
+        {
+            Type = type;
+            Name = name;
+            Damage = damage;
+            Message = message;
+        }
+
+        public void Activate(Player player)
+        {
+            player.TakeDamage(Damage);
+            Console.WriteLine(Message);
+        }
+    }
+    public abstract class Tramp(TrampType type)
     {
         protected readonly TrampType type = type;
 
@@ -10,7 +32,7 @@ namespace game.Tramps
 
         public abstract void Active();
     }
-     public class Pitfall : Tramp
+    public class Pitfall : Tramp
     {
         public Pitfall() : base(TrampType.Pitfall) { }
 
@@ -87,6 +109,20 @@ namespace game.Tramps
         public override void Active()
         {
             Console.WriteLine("You just fell into a Hole!");
+        }
+    }
+
+    public class Obstacle
+    {
+        public string Symbol { get; }
+        public bool IsBlocking { get; }
+        public string Name { get; }
+
+        public Obstacle(string symbol, bool isBlocking, string name)
+        {
+            Symbol = symbol;
+            IsBlocking = isBlocking;
+            Name = name;
         }
     }
 }

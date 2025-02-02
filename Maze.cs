@@ -18,13 +18,14 @@ namespace game
         private static List<Player> players = new List<Player>();
         private List<Token> tokens = new List<Token>();
         private static Random random = new Random();
+        
 
         public MazeGame(int n, int countGamers, int countTokens, int width, int height, int totalSquares, int rewardSquaresCount, int emptySquares, (int, int) startPosition, int[,] Mazemaze, int finishLine)
         {
             start = false;
             stop = false;
             currentTurn = 0;
-            board = new Board(0, 0, 0, 0);
+            board = new Board(0, 0, 0, 0, players.ToArray());
             board.GenerateMaze();
             players = new List<Player>();
             this.countGamers = countGamers;
