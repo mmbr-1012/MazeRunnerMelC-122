@@ -1,59 +1,86 @@
-﻿﻿using System.Threading.Tasks;
-using game.BoardGame;
-using game.Gamers;
-using game.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
-namespace game
+namespace BoardGame
 {
-    public class MazeGame
+    public class Game
     {
-        bool start;
-        bool stop;
-        private static int[,] maze = null!;
-        readonly int currentTurn;
-        readonly int countGamers;
-        readonly int countTokens;
-        readonly Board board;
-        private const int MaxPlayers = 6;
-        private static List<Player> players = new List<Player>();
-        private List<Token> tokens = new List<Token>();
-        private static Random random = new Random();
-        
+        private Board board = null!;
+        private List<Player> players = new List<Player>();
+        private const int BoardSize = 30;
+        private const int Lives = 3;
 
-        public MazeGame(int n, int countGamers, int countTokens, int width, int height, int totalSquares, int rewardSquaresCount, int emptySquares, (int, int) startPosition, int[,] Mazemaze, int finishLine)
+        public void Start()
         {
-            start = false;
-            stop = false;
-            currentTurn = 0;
-            board = new Board(0, 0, 0, 0, players.ToArray());
-            board.GenerateMaze();
-            players = new List<Player>();
-            this.countGamers = countGamers;
-            this.countTokens = countTokens;
-            maze = Mazemaze;
+            InitializePlayers();
+            board = new Board(BoardSize, BoardSize, players);
+            RunGameLoop();
         }
 
-        public void AddPlayer(Player player)
+        private void InitializePlayers()
         {
-            players.Add(player);
+            var tokens = new List<Token> {
+                new Token("Warrior", new Ability("Shield", 5, 2)),
+                new Token("Mage", new Ability("Heal", 6, 1)),
+                new Token("Rogue", new Ability("Speed", 4, 3)),
+                new Token("Archer", new Ability("Range", 5, 2)),
+                new Token("Necro", new Ability("Revive", 10, 1))
+            };
+
+            for (int i = 1; i <= 2; i++)
+            {
+                Console.WriteLine($"Player {i}, choose your token:");
+                for (int j = 0; j < tokens.Count; j++)
+                {
+                    Console.WriteLine($"{j + 1}. {tokens[j].Name} - {tokens[j].Ability.Description}");
+                }
+
+                int choice;
+                while (!int.TryParse(Console.ReadLine(), out choice) || choice < 1 || choice > tokens.Count)
+                {
+                    Console.WriteLine("Invalid choice!");
+                }
+
+                Console.WriteLine($"Player {i} name:");
+                string name = Console.ReadLine()!;
+                
+                players.Add(new Player(name, tokens[choice - 1], Lives));
+            }
         }
 
-        public bool Start { get { return start; } }
-        public bool Stop { get { return stop; } }
-        public int CurrentTurn { get { return currentTurn; } }
-        public int CountGamers { get { return countGamers; } }
-        public int CountTokens { get { return countTokens; } }
-
-        public void run()
+        private void RunGameLoop()
         {
-            start = true;
+            while (true)
+            {
+                foreach (var player in players)
+                {
+                    board.PrintBoard();
+                    Console.WriteLine($"{player.Name}'s turn | Lives: {player.Lives}");
+                    Console.WriteLine("Move with arrows/WASD, Use ability with Space");
+                    
+                    var key = Console.ReadKey(true);
+                    board.MovePlayer(key, player);
+                    
+                    if (CheckVictory(player))
+                    {
+                        Console.WriteLine($"¡{player.Name} ha ganado!");
+                        return;
+                    }
+                    
+                    if (player.Lives <= 0)
+                    {
+                        Console.WriteLine($"¡{player.Name} ha sido eliminado!");
+                        return;
+                    }
+                }
+            }
         }
 
-        public void pause()
+        private bool CheckVictory(Player player)
         {
-            stop = true;
+            var target = players[0] == player ? board.Player2Start : board.Player1Start;
+            return player.Position == target;
         }
-
-        public void NextTurn() { }
     }
 }
