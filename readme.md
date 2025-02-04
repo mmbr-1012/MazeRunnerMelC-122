@@ -13,16 +13,16 @@ Un juego de laberinto multijugador con habilidades especiales y gestión de recu
 
 🕹️ Controles
 Acción	Teclas
-Movimiento	↑↓←→ / WASD
+Movimiento	↑↓←→ / W (arriba) A (izquierda) S(abajo) D(derecha)
 Usar habilidad	Barra espaciadora
 Salir	Ctrl + C
 
 🧙 Clases Disponibles
 Personaje	Habilidad	Cooldown	Duración	Símbolo
-Warrior	Escudo	5	2	WA
-Mage	Curación	6	1	MA
-Rogue	Velocidad	4	3	RO
-Archer	Alcance	5	2	AR
+Warrior(Guerrero)	Escudo	5	2	WA
+Mage(Mago)	Curación	6	1	MA
+Rogue(Bribón)	Velocidad	4	3	RO
+Archer(Arquero)	Alcance	5	2	AR
 Necro	Revivir	10	1	NE
 🏆 Mecánicas del Juego
 Generación del Laberinto:
