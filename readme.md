@@ -13,7 +13,7 @@ Un juego de laberinto multijugador con habilidades especiales y gestión de recu
 
 🕹️ Controles
 Acción	Teclas
-Movimiento	↑↓←→ / WASD
+Movimiento	↑↓←→ / W(arriba) A(izquierda) S(abajo) D(derecha)
 Usar habilidad	Barra espaciadora
 Salir	Ctrl + C
 
