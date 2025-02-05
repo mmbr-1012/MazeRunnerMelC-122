@@ -1,9 +1,9 @@
-# 🎮 Laberinto Estratégico - Juego de Consola
+# 🎮 Laberinto Embrujado - Juego de Consola
 
 Un juego de laberinto multijugador con habilidades especiales y gestión de recursos. ¡Llega a la base enemiga antes que tu oponente!
 
 ## 🌟 Características Principales
-- **Generación procedural de laberintos** (40x40 celdas)
+- **Generación procedural de laberintos** (121x31 celdas)
 - **Sistema de 3 vidas** con trampas aleatorias
 - **5 clases de personajes** con habilidades únicas
 - **Movimiento táctico** con sistema de cooldowns
@@ -13,25 +13,25 @@ Un juego de laberinto multijugador con habilidades especiales y gestión de recu
 
 🕹️ Controles
 Acción	Teclas
-Movimiento	↑↓←→ / W (arriba) A (izquierda) S(abajo) D(derecha)
+Movimiento	↑↓←→ / WASD
 Usar habilidad	Barra espaciadora
 Salir	Ctrl + C
 
 🧙 Clases Disponibles
-Personaje	Habilidad	Cooldown	Duración	Símbolo
-Warrior(Guerrero)	Escudo	5	2	WA
-Mage(Mago)	Curación	6	1	MA
-Rogue(Bribón)	Velocidad	4	3	RO
-Archer(Arquero)	Alcance	5	2	AR
-Necro	Revivir	10	1	NE
+Personaje	Habilidad	
+Warrior	Escudo	
+Mage	Curación		
+Rogue	Velocidad		
+Archer	Alcance		
+Necro	Revivir		
 🏆 Mecánicas del Juego
 Generación del Laberinto:
 
 Paredes perimetrales
 
-20 obstáculos aleatorios (🌳)
+Obstáculos aleatorios
 
-15 trampas ocultas (💀/🔥/⚠️)
+Trampas ocultas
 
 Caminos garantizados (flood fill)
 

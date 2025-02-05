@@ -10,7 +10,7 @@ namespace BoardGame
         public int Cooldown { get; }
         public int Duration { get; }
         public string Description => $"{Name} (CD: {Cooldown}, Dur: {Duration})";
-        private int currentCooldown;
+        public int currentCooldown;
 
         public Ability(string name, int cooldown, int duration)
         {

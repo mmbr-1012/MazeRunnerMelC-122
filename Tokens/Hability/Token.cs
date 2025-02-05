@@ -14,7 +14,15 @@ namespace BoardGame
         {
             Name = name;
             Ability = ability;
-            Symbol = name[..2].ToUpper();
+            Symbol = name switch
+            {
+                "Warrior" => "❤️",
+                "Mage" => "🔮",
+                "Rogue" => "⭐",
+                "Archer" => "☀️",
+                "Necro" => "🌙",
+                _ => "?"
+            };
         }
     }
 }

@@ -7,8 +7,8 @@ namespace BoardGame
     public class Square
     {
         public SquareType Type { get; }
-        public string Symbol { get; }
-        public Player Player { get; set; }
+        public string Symbol { get; set;}
+        public Player Player { get; set; } = null!;
 
         public Square(SquareType type)
         {
@@ -22,15 +22,16 @@ namespace BoardGame
             Symbol = player.Token.Symbol;
         }
 
-        private string GetSymbol(SquareType type) => type switch
+        public string GetSymbol(SquareType type) => type switch
         {
-            SquareType.Wall => "██",
-            SquareType.Obstacle => "▓▓",
-            SquareType.Trap => GetRandomTrapSymbol(),
-            _ => "  "
+            SquareType.Wall => "█",
+            SquareType.Obstacle => "🌳",
+            SquareType.Trap => new Random().Next(3) switch { 0 => "🍄", 1 => "🌿", _ => " " },
+            _ => " "
         };
-
-        private string GetRandomTrapSymbol() => new[] { "💀", "🔥", "⚠️" }[new Random().Next(3)];
     }
+
     public enum SquareType { Empty, Wall, Obstacle, Trap }
+
+
 }
