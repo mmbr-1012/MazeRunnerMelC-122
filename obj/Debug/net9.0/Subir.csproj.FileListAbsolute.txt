@@ -1,0 +1,14 @@
+C:\Users\melan\Desktop\Subir\bin\Debug\net9.0\Subir.exe
+C:\Users\melan\Desktop\Subir\bin\Debug\net9.0\Subir.deps.json
+C:\Users\melan\Desktop\Subir\bin\Debug\net9.0\Subir.runtimeconfig.json
+C:\Users\melan\Desktop\Subir\bin\Debug\net9.0\Subir.dll
+C:\Users\melan\Desktop\Subir\bin\Debug\net9.0\Subir.pdb
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.AssemblyInfoInputs.cache
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.AssemblyInfo.cs
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.csproj.CoreCompileInputs.cache
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.dll
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\refint\Subir.dll
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.pdb
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.genruntimeconfig.cache
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\ref\Subir.dll
