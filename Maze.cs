@@ -57,12 +57,12 @@ namespace BoardGame
             {
                 foreach (var player in players)
                 {
+                    board.PrintBoard();
                     Console.WriteLine("Como puede apreciar este laberinto se ve raro, pero no se preocupe es solo que esta embrujado por un antiguo Hechicero malvado");
                     Console.WriteLine("El primer jugador se mostrara en la parte superior izquiera y el segundo jugador en la esquina inferior derecha");
                     Console.WriteLine("Les deseo suerte y que logren salir con vida de este laberinto ♫");
                     Console.WriteLine($"{player.Name}'s turn | Lives: {player.Lives}");
                     Console.WriteLine("Move with arrows/WASD, Use ability with Space");
-                    board.PrintBoard();
 
                     var key = Console.ReadKey(true);
                     board.MovePlayer(key, player);
