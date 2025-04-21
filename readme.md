@@ -58,4 +58,8 @@ Recolecta **3 fragmentos del reloj (◍)** y llévalos al **Altar Central (⏳)*
 ## 🚀 Cómo Ejecutar  
 1. Clona el repositorio:  
    ```bash  
-   git clone   
+   git clone https://github.com/mmbr-1012/MazeRunnerMelC-122 
+
+2. Abrir la consola y poner este comando cd MazeRunnerMelC-122
+
+3. Y por ultimo dotnet run   
