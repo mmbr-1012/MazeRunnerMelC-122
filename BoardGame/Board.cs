@@ -1,26 +1,48 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Spectre.Console;
 
 namespace BoardGame
 {
     public class Board
     {
         public (int, int) Player1Start { get; } = (1, 1);
-        public (int, int) Player2Start { get; }
+        public (int, int) Player2Start { get; } = (23, 49);
         private Square[,,] maze;
         private int width;
         private int height;
+        public (int, int) AltarCentral { get; set; }
+        private List<(int, int)> fragmentPositions = new List<(int, int)>();
+        private readonly int players;
 
         public Board(int height, int width, List<Player> players)
         {
-            this.width = width;
-            this.height = height;
-            Player2Start = (height - 2, width - 2);
             maze = new Square[height, width, 2];
+            this.height = height;
+            this.width = width;
 
             InitializeBoard();
+            IsBoardConnected();
             PlacePlayers(players);
+            PlaceFragments(3);
+        }
+
+        private void PlaceFragments(int quantity)
+        {
+            var rand = new Random();
+            for (int i = 0; i < quantity; i++)
+            {
+                int x, y;
+                do
+                {
+                    x = rand.Next(1, Math.Max(2, height - 1));
+                    y = rand.Next(1, Math.Max(2, width - 1));
+                } while (maze[x, y, 0].Type != SquareType.Empty || IsNearStart((x, y), 5));
+
+                fragmentPositions.Add((x, y));
+                maze[x, y, 0].Symbol = "◍"; // Símbolo del fragmento
+            }
         }
 
         private void InitializeBoard()
@@ -29,21 +51,19 @@ namespace BoardGame
             {
                 for (int j = 0; j < width; j++)
                 {
-                    maze[i, j, 0] ??= new Square(SquareType.Wall);
+                    maze[i, j, 0] = new Square(SquareType.Wall); // Inicializar como muro
                 }
             }
-
-            GenerateMaze();
-
-            AddFeatures(SquareType.Obstacle, 150);
-            AddFeatures(SquareType.Trap, 100);
+            GenerateMaze(); // Generar caminos
+            CreateGuaranteedPaths();
+            AddFeatures(SquareType.Obstacle, 20); // 20 obstáculos
+            AddFeatures(SquareType.Trap, 10); // 10 trampas aleatorias adicionales
         }
 
         private void GenerateMaze()
         {
             var rand = new Random();
             Stack<(int x, int y)> stack = new Stack<(int, int)>();
-
             stack.Push(Player1Start);
             maze[Player1Start.Item1, Player1Start.Item2, 0] = new Square(SquareType.Empty);
 
@@ -53,7 +73,6 @@ namespace BoardGame
             while (stack.Count > 0)
             {
                 var (x, y) = stack.Pop();
-
                 var directions = new List<int> { 0, 1, 2, 3 };
                 Shuffle(rand, directions);
 
@@ -73,24 +92,31 @@ namespace BoardGame
                         stack.Push((newX, newY));
                     }
                 }
-                maze[Player1Start.Item1, Player1Start.Item2, 0] = new Square(SquareType.Empty);
-                maze[Player2Start.Item1, Player2Start.Item2, 0] = new Square(SquareType.Empty);
-
-                for (int i = -1; i <= 1; i++)
-                {
-                    for (int j = -1; j <= 1; j++)
-                    {
-                        int X = Player2Start.Item1 + i;
-                        int Y = Player2Start.Item2 + j;
-                        if (X > 0 && X < height - 1 && Y > 0 && Y < width - 1)
-                        {
-                            maze[X, Y, 0] = new Square(SquareType.Empty);
-                        }
-                    }
-                }
             }
 
+            // Asegurar conexiones adicionales
             CreateGuaranteedPaths();
+            AddConnectionPaths();
+        }
+
+        private void AddConnectionPaths()
+        {
+            var rand = new Random();
+
+            // Crear conexiones adicionales entre áreas aleatorias
+            for (int i = 0; i < 8; i++)
+            {
+                int x1 = rand.Next(1, height - 2);
+                int y1 = rand.Next(1, width - 2);
+                int x2 = rand.Next(1, height - 2);
+                int y2 = rand.Next(1, width - 2);
+
+                if (maze[x1, y1, 0].Type == SquareType.Empty &&
+                    maze[x2, y2, 0].Type == SquareType.Empty)
+                {
+                    ConnectPoints((x1, y1), (x2, y2));
+                }
+            }
         }
 
         private void CreateGuaranteedPaths()
@@ -99,25 +125,37 @@ namespace BoardGame
 
             for (int i = 0; i < 4; i++)
             {
-                int centerX = height / 2;
-                int centerY = width / 2;
+                CreateRandomPath(Player1Start, (height / 2, width / 2), i);
+                CreateRandomPath(Player2Start, (height / 2, width / 2), i);
+            }
+        }
 
-                for (int j = 0; j < 15; j++)
+        private void CreateRandomPath((int x, int y) start, (int x, int y) end, int pathNumber)
+        {
+            int centerX = start.x;
+            int centerY = start.y;
+            var rand = new Random();
+
+            // Ajustar el camino según el número para crear rutas diferentes
+            int offsetX = (pathNumber - 1) * 3; // -3, 0, +3 para los tres caminos
+
+            for (int j = 0; j < 15; j++)
+            {
+                int dirX = rand.Next(-1, 2);
+                int dirY = rand.Next(-1, 2);
+
+                if (centerX > 1 && centerX < height - 2 && centerY > 1 && centerY < width - 2)
                 {
-                    int dirX = rand.Next(-1, 2);
-                    int dirY = rand.Next(-1, 2);
+                    maze[centerX, centerY, 0] = new Square(SquareType.Empty);
 
-                    if (centerX > 1 && centerX < height - 2 && centerY > 1 && centerY < width - 2)
-                    {
-                        maze[centerX, centerY, 0] = new Square(SquareType.Empty);
-                        centerX += dirX;
-                        centerY += dirY;
-                    }
+                    // Ajustar la dirección según el camino
+                    centerX += dirX;
+                    centerY += dirY + offsetX;
                 }
             }
 
-            ConnectPoints(Player1Start, (height / 2, width / 2));
-            ConnectPoints(Player2Start, (height / 2, width / 2));
+            // Conectar el final del camino al punto central
+            ConnectPoints((centerX, centerY), end);
         }
 
         private void ConnectPoints((int x, int y) start, (int x, int y) end)
@@ -156,26 +194,108 @@ namespace BoardGame
             for (int i = 0; i < quantity; i++)
             {
                 int x, y;
-                int attempts = 0;
-                bool validPosition = false;
-
+                bool validPosition;
                 do
                 {
-                    x = rand.Next(1, height - 1);
-                    y = rand.Next(1, width - 1);
+                    x = rand.Next(1, Math.Max(2, height - 1));
+                    y = rand.Next(1, Math.Max(2, width - 1));
 
-                    validPosition = maze[x, y, 0].Type == SquareType.Empty && !IsNearStart((x, y), 10) && !IsMainPath((x, y));
+                    // Verificar que no está en el camino principal
+                    validPosition = maze[x, y, 0].Type == SquareType.Empty
+                                  && !IsNearStart((x, y), 5)
+                                  && !IsMainPath((x, y))
+                                  && !IsOnPlayerPath((x, y));
+                } while (!validPosition);
 
-                    attempts++;
-                } while (!validPosition && attempts < 100);
-
-                if (validPosition)
-                {
-                    maze[x, y, 0] = new Square(type);
-                }
+                maze[x, y, 0] = new Square(type);
             }
         }
 
+        private bool IsOnPlayerPath((int x, int y) pos)
+        {
+            // Verificar si está en el camino entre el jugador 1 y el centro
+            if (IsBetweenPoints(pos, Player1Start, (height / 2, width / 2)))
+                return true;
+
+            // Verificar si está en el camino entre el jugador 2 y el centro
+            if (IsBetweenPoints(pos, Player2Start, (height / 2, width / 2)))
+                return true;
+
+            return false;
+        }
+
+        private bool IsBetweenPoints((int x, int y) pos, (int x, int y) start, (int x, int y) end)
+        {
+            // Verificar si el punto está en el camino recto entre start y end
+            int minX = Math.Min(start.Item1, end.Item1);
+            int maxX = Math.Max(start.Item1, end.Item1);
+            int minY = Math.Min(start.Item2, end.Item2);
+            int maxY = Math.Max(start.Item2, end.Item2);
+
+            if (pos.Item1 >= minX && pos.Item1 <= maxX && pos.Item2 >= minY && pos.Item2 <= maxY)
+            {
+                // Verificar si está exactamente en la línea
+                if (start.Item1 == end.Item1) // camino vertical
+                    return pos.Item1 == start.Item1;
+                else if (start.Item2 == end.Item2) // camino horizontal
+                    return pos.Item2 == start.Item2;
+                else // camino diagonal
+                    return Math.Abs((pos.Item2 - start.Item2) - (pos.Item1 - start.Item1)) <= 1;
+            }
+            return false;
+        }
+
+        private bool IsBoardConnected()
+        {
+            bool[,] visited = new bool[height, width];
+            Queue<(int x, int y)> queue = new Queue<(int, int)>();
+
+            // Iniciar BFS desde ambas posiciones de jugador
+            queue.Enqueue(Player2Start);
+            visited[Player2Start.Item1, Player2Start.Item2] = true;
+
+            int[] dirX = { -1, 1, 0, 0 };
+            int[] dirY = { 0, 0, -1, 1 };
+
+            while (queue.Count > 0)
+            {
+                var (x, y) = queue.Dequeue();
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int newX = x + dirX[i];
+                    int newY = y + dirY[i];
+
+                    // Verificar límites del tablero
+                    if (newX > 0 && newX < height - 1 && newY > 0 && newY < width - 1)
+                    {
+                        Square cell = maze[newX, newY, 0];
+
+                        // Celdas transitables: vacías o trampas (ignorar obstáculos/muros)
+                        if (!visited[newX, newY] &&
+                           (cell.Type == SquareType.Empty || cell.Type == SquareType.Trap))
+                        {
+                            visited[newX, newY] = true;
+                            queue.Enqueue((newX, newY));
+                        }
+                    }
+                }
+            }
+
+            // Verificar que todas las celdas transitables están conectadas
+            for (int i = 1; i < height - 1; i++)
+            {
+                for (int j = 1; j < width - 1; j++)
+                {
+                    Square cell = maze[i, j, 0];
+                    if ((cell.Type == SquareType.Empty || cell.Type == SquareType.Trap) && !visited[i, j])
+                    {
+                        return false; // Celda inalcanzable
+                    }
+                }
+            }
+            return true;
+        }
         private bool IsMainPath((int x, int y) pos)
         {
             int centerX = height / 2;
@@ -198,22 +318,29 @@ namespace BoardGame
             players[1].Position = Player2Start;
             UpdatePlayerLayer(players[0]);
             UpdatePlayerLayer(players[1]);
+            PrintBoard();
         }
 
-        public void MovePlayer(ConsoleKeyInfo key, Player player)
+        public void MovePlayer(Player player)
         {
             var (dx, dy) = (0, 0);
-            switch (key.Key)
+            int movesLeft = player.MoveSpeed;
+            while (movesLeft > 0)
             {
-                case ConsoleKey.UpArrow:
-                case ConsoleKey.W: dx = -1; break;
-                case ConsoleKey.DownArrow:
-                case ConsoleKey.S: dx = 1; break;
-                case ConsoleKey.LeftArrow:
-                case ConsoleKey.A: dy = -1; break;
-                case ConsoleKey.RightArrow:
-                case ConsoleKey.D: dy = 1; break;
-                case ConsoleKey.Spacebar: UseAbility(player); break;
+                var key = Console.ReadKey(true);
+                switch (key.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                    case ConsoleKey.W: dx = -1; break;
+                    case ConsoleKey.DownArrow:
+                    case ConsoleKey.S: dx = 1; break;
+                    case ConsoleKey.LeftArrow:
+                    case ConsoleKey.A: dy = -1; break;
+                    case ConsoleKey.RightArrow:
+                    case ConsoleKey.D: dy = 1; break;
+                    case ConsoleKey.Spacebar: UseAbility(player); break;
+                }
+                movesLeft--;
             }
 
             var newPos = (player.Position.Item1 + dx, player.Position.Item2 + dy);
@@ -224,6 +351,19 @@ namespace BoardGame
                 player.Position = newPos;
                 UpdatePlayerLayer(player);
                 CheckTrap(player);
+                CheckFragment(player);
+            }
+        }
+
+        private void CheckFragment(Player player)
+        {
+            var pos = player.Position;
+            if (fragmentPositions.Contains(pos))
+            {
+                player.CollectedFragments++;
+                fragmentPositions.Remove(pos);
+                AnsiConsole.MarkupLine($"[bold cyan]¡{player.Name} sintió el latir del tiempo![/]");
+                AnsiConsole.MarkupLine($"[grey]Fragmentos recolectados: {player.CollectedFragments}/3[/]");
             }
         }
 
@@ -259,6 +399,11 @@ namespace BoardGame
                         player.HasRevive = true;
                         Console.WriteLine("¡Pacto oscuro! Revivirás una vez si pierdes todas las vidas.");
                         break;
+
+                    case "Berserker":
+                        player.MoveSpeed += 2; // Aumenta la velocidad de movimiento
+                        Console.WriteLine($"¡{player.Name} entra en furia! +2 movimientos por turno.");
+                        break;
                 }
 
                 UpdateAbilityEffects(player);
@@ -293,9 +438,9 @@ namespace BoardGame
         private void CheckTrap(Player player)
         {
             var square = maze[player.Position.Item1, player.Position.Item2, 0];
-
             if (square.Type == SquareType.Trap)
             {
+                string trapSymbol = square.Symbol;
                 if (player.ShieldActive)
                 {
                     player.ShieldActive = false;
@@ -303,17 +448,39 @@ namespace BoardGame
                 }
                 else
                 {
-                    player.Lives--;
-                    Console.WriteLine($"¡{player.Name} cayó en una trampa! Vidas: {player.Lives}");
-
-                    if (player.Lives <= 0 && player.HasRevive)
+                    switch (trapSymbol)
                     {
-                        player.Lives = 1;
-                        player.HasRevive = false;
-                        Console.WriteLine("¡Pacto oscuro activado! Revivido con 1 vida.");
+                        case "D": // Trampa de daño
+                            player.Lives--;
+                            Console.WriteLine($"¡{player.Name} perdió 1 vida! Vidas restantes: {player.Lives}");
+                            break;
+                        case "T": // Teletransporte
+                            TeleportPlayer(player);
+                            Console.WriteLine($"¡{player.Name} fue teletransportado!");
+                            break;
+                        case "C": // Congelamiento
+                            player.ExtraMoves = -2; // Bloquea movimientos por 2 turnos
+                            Console.WriteLine($"¡{player.Name} no puede moverse por 2 turnos!");
+                            break;
                     }
                 }
             }
+        }
+
+        // Método para teletransportar a una posición aleatoria
+        private void TeleportPlayer(Player player)
+        {
+            var rand = new Random();
+            int x, y;
+            do
+            {
+                x = rand.Next(1, height - 1);
+                y = rand.Next(1, width - 1);
+            } while (maze[x, y, 0].Type == SquareType.Wall || maze[x, y, 0].Type == SquareType.Obstacle);
+
+            ClearPlayerPosition(player);
+            player.Position = (x, y);
+            UpdatePlayerLayer(player);
         }
 
         private bool IsValidMove((int, int) pos, Player currentPlayer)
@@ -322,7 +489,6 @@ namespace BoardGame
             {
                 return false;
             }
-
             var cell = maze[pos.Item1, pos.Item2, 0];
             return cell.Type != SquareType.Wall && (currentPlayer.PhaseActive || cell.Type != SquareType.Obstacle);
         }
@@ -334,21 +500,66 @@ namespace BoardGame
 
         private void ClearPlayerPosition(Player player)
         {
-            maze[player.Position.Item1, player.Position.Item2, 1] = null!;
+            maze[player.Position.Item1, player.Position.Item2, 1] = new Square(SquareType.Empty);
         }
 
         public void PrintBoard()
         {
             Console.Clear();
+
+            // Primero imprimir capa base (terreno)
             for (int i = 0; i < height; i++)
             {
                 for (int j = 0; j < width; j++)
                 {
-                    var playerSquare = maze[i, j, 1];
-                    var terrainSquare = maze[i, j, 0];
-                    Console.Write(playerSquare != null ? playerSquare.Player.Token.Symbol : terrainSquare.Symbol);
+                    var terrainLayer = maze[i, j, 0];
+
+                    switch (terrainLayer.Symbol)
+                    {
+                        case "T": // Trampa teletransporte
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            break;
+                        case "D": // Trampa daño
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            break;
+                        case "C": // Trampa congelamiento
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            break;
+                        default: // Vacío
+                            Console.ResetColor();
+                            break;
+                    }
+
+                    // Imprimir símbolo del terreno o muro
+                    Console.Write(terrainLayer.Symbol);
                 }
                 Console.WriteLine();
+            }
+
+            // Segundo imprimir capa de jugadores sobre el laberinto
+            int consoleY = Console.CursorTop - height;
+
+            for (int i = 0; i < height; i++)
+            {
+                Console.SetCursorPosition(0, consoleY + i);
+
+                for (int j = 0; j < width; j++)
+                {
+                    var playerLayer = maze[i, j, 1];
+
+                    if (playerLayer?.Player != null)
+                    {
+                        Console.SetCursorPosition(j, consoleY + i);
+                        Console.Write(playerLayer.Player.Token.Symbol);
+                    }
+                }
+            }
+
+            // Imprimir borde inferior
+            Console.SetCursorPosition(0, consoleY + height);
+            for (int i = 0; i < width; i++)
+            {
+                Console.Write("─");
             }
         }
     }

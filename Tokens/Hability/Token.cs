@@ -16,11 +16,11 @@ namespace BoardGame
             Ability = ability;
             Symbol = name switch
             {
-                "Warrior" => "❤️",
-                "Mage" => "🔮",
-                "Rogue" => "⭐",
-                "Archer" => "☀️",
-                "Necro" => "🌙",
+                "Guerrero del Tiempo" => "♥",
+                "Mago Cronomántico" => "♦",
+                "Ladrón de Reliquias" => "♣",
+                "Necrótico Eterno" => "♠",
+                "Berserker Temporal" => "⌂",
                 _ => "?"
             };
         }

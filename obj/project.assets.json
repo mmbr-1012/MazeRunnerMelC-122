@@ -1,11 +1,48 @@
 {
   "version": 3,
   "targets": {
-    "net9.0": {}
+    "net9.0": {
+      "Spectre.Console/0.49.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Spectre.Console.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Spectre.Console.dll": {
+            "related": ".xml"
+          }
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "Spectre.Console/0.49.0": {
+      "sha512": "1s+hhYq5fcrqCvZhrNOPehAmCZJM6cjro85g1Qirvmm1tys+/sfFJgePCGcxr+S/nONZ/lCDTflPda3C+WlBdg==",
+      "type": "package",
+      "path": "spectre.console/0.49.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net6.0/Spectre.Console.dll",
+        "lib/net6.0/Spectre.Console.xml",
+        "lib/net7.0/Spectre.Console.dll",
+        "lib/net7.0/Spectre.Console.xml",
+        "lib/net8.0/Spectre.Console.dll",
+        "lib/net8.0/Spectre.Console.xml",
+        "lib/netstandard2.0/Spectre.Console.dll",
+        "lib/netstandard2.0/Spectre.Console.xml",
+        "small-logo.png",
+        "spectre.console.0.49.0.nupkg.sha512",
+        "spectre.console.nuspec"
+      ]
+    }
+  },
   "projectFileDependencyGroups": {
-    "net9.0": []
+    "net9.0": [
+      "Spectre.Console >= 0.49.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\melan\\.nuget\\packages\\": {}
@@ -52,6 +89,12 @@
     "frameworks": {
       "net9.0": {
         "targetAlias": "net9.0",
+        "dependencies": {
+          "Spectre.Console": {
+            "target": "Package",
+            "version": "[0.49.0, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",

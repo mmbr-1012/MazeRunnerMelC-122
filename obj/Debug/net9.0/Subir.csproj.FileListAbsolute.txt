@@ -12,3 +12,6 @@ C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\refint\Subir.dll
 C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.pdb
 C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.genruntimeconfig.cache
 C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\ref\Subir.dll
+C:\Users\melan\Desktop\Subir\bin\Debug\net9.0\Spectre.Console.dll
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.csproj.AssemblyReference.cache
+C:\Users\melan\Desktop\Subir\obj\Debug\net9.0\Subir.csproj.Up2Date

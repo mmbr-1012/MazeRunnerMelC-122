@@ -1,68 +1,61 @@
-# 🎮 Laberinto Embrujado - Juego de Consola
+# 🕰️ El Templo del Tiempo Perdido 🕰️  
+**Un juego de estrategia y supervivencia en un laberinto temporal**  
 
-Un juego de laberinto multijugador con habilidades especiales y gestión de recursos. ¡Llega a la base enemiga antes que tu oponente!
+---
 
-## 🌟 Características Principales
-- **Generación procedural de laberintos** (121x31 celdas)
-- **Sistema de 3 vidas** con trampas aleatorias
-- **5 clases de personajes** con habilidades únicas
-- **Movimiento táctico** con sistema de cooldowns
-- **Detección de caminos accesibles** (flood fill algorithm)
-- **Renderizado en capas** (terreno + jugadores)
-- **Interfaz de consola interactiva**
+## 📜 Descripción  
+En un antiguo templo olvidado, un reloj místico que controlaba el flujo del tiempo ha sido destruido. Dos aventureros deberán adentrarse en sus ruinas para recolectar los **◍ Fragmentos del Reloj** y llevarlos al **Altar Central**, evitando trampas mortales y usando habilidades únicas para restaurar el equilibrio temporal.  
 
-🕹️ Controles
-Acción	Teclas
-Movimiento	↑↓←→ / W(arriba) A(izquierda) S(abajo) D(derecha)
-Usar habilidad	Barra espaciadora
-Salir	Ctrl + C
+---
 
-🧙 Clases Disponibles
-Personaje	Habilidad	
-Warrior	Escudo	
-Mage	Curación		
-Rogue	Velocidad		
-Archer	Alcance		
-Necro	Revivir		
-🏆 Mecánicas del Juego
-Generación del Laberinto:
+## 🎮 Características Principales  
+- **Laberinto generado proceduralmente**: Cada partida es única.  
+- **Dos jugadores**: Compite o coopera para ganar.  
+- **Trampas temporales**: Teletransporte, daño y congelamiento.  
+- **Habilidades únicas**: Cada personaje tiene poderes especiales.  
+- **Estética retro**: Símbolos y colores en consola.  
 
-Paredes perimetrales
+---
 
-Obstáculos aleatorios
+## 🕹️ Cómo Jugar  
+### Objetivo  
+Recolecta **3 fragmentos del reloj (◍)** y llévalos al **Altar Central (⏳)** para ganar.  
 
-Trampas ocultas
+### Mecánicas  
+1. **Movimiento**:  
+   - Usa las teclas de dirección o **WASD** para moverte.  
+   - **Velocidad**: Cada jugador tiene 1 movimiento por turno (algunas habilidades lo modifican).  
+2. **Fragmentos**:  
+   - Al pasar sobre un fragmento (`◍`), lo recolectas automáticamente.  
+3. **Trampas**:  
+   - **🌀 Teletransporte**: Te mueve a una ubicación aleatoria.  
+   - **☠ Daño**: Pierdes 1 vida.  
+   - **⚠ Congelamiento**: Pierdes 2 turnos.  
+4. **Habilidades**:  
+   - Actívalas con la **Barra Espaciadora** (tienen tiempo de recarga).  
 
-Caminos garantizados (flood fill)
+---
 
-Sistema de Trampas:
+## 🎭 Tokens y Habilidades  
+| Símbolo | Nombre               | Habilidad              | Efecto                              | CD  |  
+|---------|----------------------|------------------------|-------------------------------------|-----|  
+| ⏳      | Guerrero del Tiempo  | Escudo Temporal        | Bloquea la próxima trampa.          | 5   |  
+| 🌀      | Mago Cronomántico    | Retroceso              | Recupera 1 vida.                    | 6   |  
+| ⚡      | Ladrón de Reliquias  | Velocidad Cuántica     | +1 movimiento extra.                | 4   |  
+| 🏹      | Arquero Ancestral    | Visión Futura          | Ignora obstáculos por 1 turno.      | 5   |  
+| 💀      | Necrótico Eterno     | Resurrección           | Revive una vez si pierdes todas las vidas. | 10 |  
+| 🔥      | Berserker Temporal   | Distorsión             | +2 movimientos por turno.           | 3   |  
 
-Reducen 1 vida al activarse
+---
 
-Símbolos aleatorios revelados al pisar
+## ⚙️ Requisitos del Sistema  
+- **Sistema Operativo**: Windows/macOS/Linux.  
+- **Consola compatible con UTF-8**.  
+- **.NET Core 5.0** o superior.  
 
-Posicionamiento estratégico
+---
 
-Victoria:
-
-Alcanzar la posición inicial del oponente
-
-Eliminar al oponente (vidas = 0)
-
-📌 Reglas Clave
-Movimiento restringido a celdas vacías
-
-Habilidades consumen turno
-
-Trampas reveladas permanecen visibles
-
-Cooldowns globales por habilidad
-
-Posiciones iniciales fijas (esquinas opuestas)
-
-🛡️ Sistema de Habilidades
-Habilidades afectan mecánicas de movimiento
-
-Efectos visuales en consola
-
-Gestión de estado por turnos
+## 🚀 Cómo Ejecutar  
+1. Clona el repositorio:  
+   ```bash  
+   git clone   

@@ -8,6 +8,7 @@ namespace BoardGame
     {
         public static void Main()
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
             Game game = new Game();
             game.Start();
         }

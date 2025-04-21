@@ -14,6 +14,9 @@ namespace BoardGame
         public int ExtraMoves { get; set; }
         public bool PhaseActive { get; set; }
         public bool HasRevive { get; set; }
+        public int MoveSpeed { get; set; } = 1;
+        public int MovesBlocked { get; set; } = 0;
+        public int CollectedFragments { get; set; } = 0;
 
         public Player(string name, Token token, int lives)
         {
