@@ -137,7 +137,7 @@ namespace BoardGame
             var rand = new Random();
 
             // Ajustar el camino según el número para crear rutas diferentes
-            int offsetX = (pathNumber - 1) * 3; // -3, 0, +3 para los tres caminos
+            int offsetX = (pathNumber - 1) * 3; 
 
             for (int j = 0; j < 15; j++)
             {
